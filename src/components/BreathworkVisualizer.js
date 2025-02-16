@@ -11,6 +11,7 @@ const BreathworkVisualizer = () => {
   const [timer, setTimer] = useState(inhaleDuration);
   const [isAnimating, setIsAnimating] = useState(true);
   const [selectedTechnique, setSelectedTechnique] = useState("Custom");
+  const [previousPhase, setPreviousPhase] = useState("Inhale");
 
   // Sound States
   const [selectedSound, setSelectedSound] = useState("None");
@@ -25,7 +26,6 @@ const BreathworkVisualizer = () => {
     "Night Forest": "/sounds/mixkit-night-forest-with-insects-2414.wav",
     "Sea Waves": "/sounds/mixkit-sea-waves-with-birds-loop-1185.wav"
   };
-  
 
   // Handle sound selection
   useEffect(() => {
@@ -37,7 +37,7 @@ const BreathworkVisualizer = () => {
     audioRef.current.src = soundOptions[selectedSound];
     audioRef.current.loop = true;
     audioRef.current.volume = volume;
-    
+
     if (isSoundPlaying) {
       audioRef.current.play();
     }
@@ -52,21 +52,28 @@ const BreathworkVisualizer = () => {
   };
 
   // ✅ Reset animation when switching techniques
-  useEffect(() => {
-    if (selectedTechnique !== "Custom") {
-      const { inhale, holdInhale, exhale, holdExhale } = techniques[selectedTechnique];
-      setInhaleDuration(inhale);
-      setInhaleHold(holdInhale);
-      setExhaleDuration(exhale);
-      setExhaleHold(holdExhale);
+// ✅ Fix: Ensure Custom mode resets properly
+useEffect(() => {
+  if (selectedTechnique === "Custom") {
+    // Allow user to modify values freely
+    return;
+  }
 
-      // Reset to inhale phase when switching techniques
-      setBreathPhase("Inhale");
-      setTimer(inhale);
-      setIsAnimating(false);
-      setTimeout(() => setIsAnimating(true), 100);
-    }
-  }, [selectedTechnique]);
+  if (selectedTechnique !== "Custom") {
+    const { inhale, holdInhale, exhale, holdExhale } = techniques[selectedTechnique];
+    setInhaleDuration(inhale);
+    setInhaleHold(holdInhale);
+    setExhaleDuration(exhale);
+    setExhaleHold(holdExhale);
+    
+    // Reset to inhale phase when switching techniques
+    setBreathPhase("Inhale");
+    setTimer(inhale);
+    setIsAnimating(false);
+    setTimeout(() => setIsAnimating(true), 100);
+  }
+}, [selectedTechnique]);
+
 
   // ✅ Timer management for breathwork phases
   useEffect(() => {
@@ -76,7 +83,7 @@ const BreathworkVisualizer = () => {
       setTimer(
         breathPhase === "Inhale"
           ? inhaleDuration
-          : breathPhase === "Inhale Hold" && inhaleHold > 0
+          : breathPhase === "Hold" && previousPhase === "Inhale"
           ? inhaleHold
           : breathPhase === "Exhale"
           ? exhaleDuration
@@ -87,15 +94,23 @@ const BreathworkVisualizer = () => {
         setTimer((prevTime) => {
           if (prevTime <= 1) {
             setBreathPhase((prevPhase) => {
-              if (prevPhase === "Inhale") return inhaleHold > 0 ? "Inhale Hold" : "Exhale";
-              if (prevPhase === "Inhale Hold") return "Exhale";
-              if (prevPhase === "Exhale") return exhaleHold > 0 ? "Exhale Hold" : "Inhale";
+              if (prevPhase === "Inhale") {
+                setPreviousPhase("Inhale");
+                return inhaleHold > 0 ? "Hold" : "Exhale";
+              }
+              if (prevPhase === "Hold") {
+                return previousPhase === "Inhale" ? "Exhale" : "Inhale";
+              }
+              if (prevPhase === "Exhale") {
+                setPreviousPhase("Exhale");
+                return exhaleHold > 0 ? "Hold" : "Inhale";
+              }
               return "Inhale";
             });
 
             return breathPhase === "Inhale"
               ? inhaleDuration
-              : breathPhase === "Inhale Hold"
+              : breathPhase === "Hold" && previousPhase === "Inhale"
               ? inhaleHold
               : breathPhase === "Exhale"
               ? exhaleDuration
@@ -110,7 +125,7 @@ const BreathworkVisualizer = () => {
   }, [isAnimating, breathPhase, inhaleDuration, inhaleHold, exhaleDuration, exhaleHold, selectedTechnique]);
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div style={{ textAlign: "center", marginTop: "50px", transition: "background-color 1s ease-in-out", padding: "20px" }}>
       <h2>Breathwork Visualizer</h2>
       <p>Select a breathing technique or customize your own</p>
 
@@ -120,7 +135,7 @@ const BreathworkVisualizer = () => {
         <select
           value={selectedTechnique}
           onChange={(e) => setSelectedTechnique(e.target.value)}
-          style={{ marginLeft: "10px", padding: "5px" }}
+          style={{ marginLeft: "10px", padding: "5px", borderRadius: "5px", fontSize: "16px" }}
         >
           {Object.keys(techniques).map((tech) => (
             <option key={tech} value={tech}>
@@ -130,25 +145,27 @@ const BreathworkVisualizer = () => {
         </select>
       </label>
 
-      {/* Custom Breath Settings */}
-      {selectedTechnique === "Custom" && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "15px", marginBottom: "20px", marginTop: "20px" }}>
-          <label>Inhale: {inhaleDuration}s <input type="range" min="2" max="10" value={inhaleDuration} onChange={(e) => setInhaleDuration(parseInt(e.target.value))} /></label>
-          <label>Inhale Hold: {inhaleHold}s <input type="range" min="0" max="5" value={inhaleHold} onChange={(e) => setInhaleHold(parseInt(e.target.value))} /></label>
-          <label>Exhale: {exhaleDuration}s <input type="range" min="2" max="10" value={exhaleDuration} onChange={(e) => setExhaleDuration(parseInt(e.target.value))} /></label>
-          <label>Exhale Hold: {exhaleHold}s <input type="range" min="0" max="5" value={exhaleHold} onChange={(e) => setExhaleHold(parseInt(e.target.value))} /></label>
-        </div>
-      )}
-
       {/* Breath Phase Text */}
-      <h3 style={{ fontSize: "28px", marginTop: "40px" }}>{breathPhase}</h3>
-      <p style={{ fontSize: "20px", marginBottom: "40px" }}>Time Remaining: {timer}s</p>
+      <h3 style={{ fontSize: "32px", marginTop: "40px", transition: "color 0.5s ease-in-out" }}>{breathPhase}</h3>
+      <p style={{ fontSize: "22px", marginBottom: "40px" }}>Time Remaining: {timer}s</p>
 
       {/* Animated Breath Circle */}
       <motion.div
-        animate={{ scale: breathPhase.includes("Inhale") ? 1.5 : 1 }}
-        transition={{ duration: inhaleDuration, ease: "easeInOut" }}
-        style={{ width: "350px", height: "350px", borderRadius: "50%", backgroundColor: "lightblue", margin: "80px auto" }}
+        animate={{
+          scale: breathPhase === "Inhale" ? 1.5 : breathPhase === "Hold" ? previousPhase === "Inhale" ? 1.5 : 1 : 1,
+        }}
+        transition={{
+          duration: breathPhase === "Hold" ? 0 : breathPhase === "Inhale" ? inhaleDuration : exhaleDuration,
+          ease: "easeInOut",
+        }}
+        style={{
+          width: "350px",
+          height: "350px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #a6dcef, #5a9bd3)",
+          boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
+          margin: "80px auto",
+        }}
       ></motion.div>
 
       {/* Sound Selection */}
@@ -163,7 +180,7 @@ const BreathworkVisualizer = () => {
         </label>
 
         {/* Sound Controls */}
-        <button onClick={() => setIsSoundPlaying(!isSoundPlaying)} style={{ marginLeft: "10px" }}>
+        <button onClick={() => setIsSoundPlaying(!isSoundPlaying)} style={{ marginLeft: "10px", padding: "8px 12px", borderRadius: "5px" }}>
           {isSoundPlaying ? "Pause" : "Play"}
         </button>
 
