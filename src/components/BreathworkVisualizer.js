@@ -128,7 +128,7 @@ useEffect(() => {
     <div style={{ textAlign: "center", marginTop: "50px", transition: "background-color 1s ease-in-out", padding: "20px" }}>
       <h2>Breathwork Visualizer</h2>
       <p>Select a breathing technique or customize your own</p>
-
+  
       {/* Dropdown for Techniques */}
       <label>
         Select Technique:
@@ -144,15 +144,71 @@ useEffect(() => {
           ))}
         </select>
       </label>
-
+  
+      {/* ✅ Customization Sliders - Only Visible When "Custom" is Selected */}
+      {selectedTechnique === "Custom" && (
+        <div style={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            flexWrap: "wrap", 
+            gap: "20px", 
+            marginBottom: "20px", 
+            marginTop: "20px" 
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <label>Inhale: {inhaleDuration}s</label>
+            <input 
+              type="range" 
+              min="2" 
+              max="10" 
+              value={inhaleDuration} 
+              onChange={(e) => setInhaleDuration(parseInt(e.target.value))} 
+            />
+          </div>
+  
+          <div style={{ textAlign: "center" }}>
+            <label>Hold (After Inhale): {inhaleHold}s</label>
+            <input 
+              type="range" 
+              min="0" 
+              max="5" 
+              value={inhaleHold} 
+              onChange={(e) => setInhaleHold(parseInt(e.target.value))} 
+            />
+          </div>
+  
+          <div style={{ textAlign: "center" }}>
+            <label>Exhale: {exhaleDuration}s</label>
+            <input 
+              type="range" 
+              min="2" 
+              max="10" 
+              value={exhaleDuration} 
+              onChange={(e) => setExhaleDuration(parseInt(e.target.value))} 
+            />
+          </div>
+  
+          <div style={{ textAlign: "center" }}>
+            <label>Hold (After Exhale): {exhaleHold}s</label>
+            <input 
+              type="range" 
+              min="0" 
+              max="5" 
+              value={exhaleHold} 
+              onChange={(e) => setExhaleHold(parseInt(e.target.value))} 
+            />
+          </div>
+        </div>
+      )}
+  
       {/* Breath Phase Text */}
       <h3 style={{ fontSize: "32px", marginTop: "40px", transition: "color 0.5s ease-in-out" }}>{breathPhase}</h3>
       <p style={{ fontSize: "22px", marginBottom: "40px" }}>Time Remaining: {timer}s</p>
-
+  
       {/* Animated Breath Circle */}
       <motion.div
         animate={{
-          scale: breathPhase === "Inhale" ? 1.5 : breathPhase === "Hold" ? previousPhase === "Inhale" ? 1.5 : 1 : 1,
+          scale: breathPhase === "Inhale" ? 1.5 : breathPhase === "Hold" ? (previousPhase === "Inhale" ? 1.5 : 1) : 1,
         }}
         transition={{
           duration: breathPhase === "Hold" ? 0 : breathPhase === "Inhale" ? inhaleDuration : exhaleDuration,
@@ -167,7 +223,7 @@ useEffect(() => {
           margin: "80px auto",
         }}
       ></motion.div>
-
+  
       {/* Sound Selection */}
       <div style={{ marginTop: "30px" }}>
         <label>
@@ -178,12 +234,12 @@ useEffect(() => {
             ))}
           </select>
         </label>
-
+  
         {/* Sound Controls */}
         <button onClick={() => setIsSoundPlaying(!isSoundPlaying)} style={{ marginLeft: "10px", padding: "8px 12px", borderRadius: "5px" }}>
           {isSoundPlaying ? "Pause" : "Play"}
         </button>
-
+  
         <label style={{ marginLeft: "10px" }}>
           Volume:
           <input type="range" min="0" max="1" step="0.1" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
@@ -191,6 +247,7 @@ useEffect(() => {
       </div>
     </div>
   );
+  
 };
 
 export default BreathworkVisualizer;
