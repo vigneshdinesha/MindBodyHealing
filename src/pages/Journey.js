@@ -188,21 +188,82 @@ const getAnimation = (type) => {
           }}
         />
       );
-    case "pulsing-energy":
-      return (
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-          style={{
-            width: "100%",
-            height: "100%",
-            background: "url('/animations/pulsing-energy.gif') center/cover no-repeat",
-          }}
-        />
-      );
-    default:
+      case "pulsing-energy":
+        return (
+          <motion.div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100vh",
+              textAlign: "center",
+              position: "relative",
+              zIndex: 10,
+            }}
+          >
+            <BackgroundBeHereNow />
+            <PulsingCircle />
+            <BeHereNowText />
+          </motion.div>
+        );
+      
+    
       return null;
   }
 };
+
+const BackgroundBeHereNow = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 4 }} // Slow fade-in effect
+    style={{
+      position: "absolute",
+      width: "100vw",
+      height: "100vh",
+      background: "linear-gradient(to bottom, #F5F5F5, #E0E0E0)",
+    }}
+  />
+);
+
+
+
+const PulsingCircle = () => (
+  <motion.div
+    animate={{ scale: [1, 1.05, 1] }}
+    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+    style={{
+      width: "200px",
+      height: "200px",
+      borderRadius: "50%",
+      background: "rgba(200, 200, 200, 0.5)",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    }}
+  />
+);
+
+const BeHereNowText = () => (
+  <motion.div
+    style={{
+      textAlign: "center",
+      fontSize: "3em",
+      fontWeight: "bold",
+      marginTop: "20px", // Adjust for better positioning
+    }}
+  >
+    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2, delay: 0.5 }}>
+      Be.
+    </motion.p>
+    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2, delay: 2 }}>
+      Here.
+    </motion.p>
+    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2, delay: 3.5 }}>
+      Now.
+    </motion.p>
+  </motion.div>
+);
+
+
 
 export default Journey;
