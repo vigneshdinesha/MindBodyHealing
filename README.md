@@ -29,8 +29,8 @@ Each component plays a crucial role in making this experience immersive, respons
 🎨 Breathwork Visualizer
 Smooth inhale-exhale animations using GSAP
 User-controlled breathing cycles for different rhythms (e.g., box breathing, 4-7-8 method)
-![BreathworkVisualizer](image.png)
-![BreathworkVisualizer2](image-1.png)
+[Breathwork-Visualizer](<../../Desktop/Screen Recording 2025-02-23 at 11.59.15 PM.mov>)
+
 
 🎶 Immersive Soundscapes
 Seamless audio looping using Web Audio API
